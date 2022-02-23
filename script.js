@@ -1,4 +1,6 @@
 const gameContainer = document.getElementById("game");
+const cardsToClear = [];
+const cardsToEvaluate = [];
 
 const COLORS = [
   "red",
@@ -59,8 +61,37 @@ function createDivsForColors(colorArray) {
 
 // TODO: Implement this function!
 function handleCardClick(event) {
-  // you can use event.target to see which element was clicked
-  console.log("you just clicked", event.target);
+  if (
+    cardsToClear.length == 0 &&
+    (cardsToEvaluate.length == 0 ||
+      (cardsToEvaluate.length < 2 && cardsToEvaluate[0] !== event.target))
+  ) {
+    setColor(event.target, event.target.className);
+    cardsToEvaluate.push(event.target);
+  }
+  if (cardsToEvaluate.length == 2) {
+    evaluateCards();
+  }
+}
+
+function evaluateCards() {
+  if (cardsToEvaluate[0].className != cardsToEvaluate[1].className) {
+    cardsToClear.push(cardsToEvaluate.pop());
+    cardsToClear.push(cardsToEvaluate.pop());
+    setTimeout(clearMismatches, 1000);
+  } else {
+    cardsToEvaluate.splice(0, 2);
+  }
+}
+
+function clearMismatches() {
+  while (cardsToClear.length > 0) {
+    setColor(cardsToClear.pop(), "");
+  }
+}
+
+function setColor(card, color) {
+  card.style.backgroundColor = color;
 }
 
 // when the DOM loads
