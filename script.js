@@ -1,73 +1,72 @@
 const gameContainer = document.getElementById("game");
+const startButton = document.querySelector("#start-button");
+const resetButton = document.querySelector("#reset-button");
+const submitButton = document.querySelector("#submit-button");
+const currentScore = document.querySelector("#score-current");
+const bestScore = document.querySelector("#score-best");
+const enteredNumber = document.querySelector("#number-entry");
 const cardsToClear = [];
 const cardsToEvaluate = [];
+const scores = { current: 0, best: -1 };
+let includedEmoji = [];
+let cardNumber = 10;
+let matchedCardNumber = 0;
 
+//Provided by Springboard, order adjusted to list colors in pairs
 const COLORS = [
   "red",
-  "blue",
+  "red",
   "green",
+  "green",
+  "blue",
+  "blue",
+  "orange",
   "orange",
   "purple",
-  "red",
-  "blue",
-  "green",
-  "orange",
   "purple",
 ];
 
-// here is a helper function to shuffle an array
-// it returns the same array with values shuffled
-// it is based on an algorithm called Fisher Yates if you want to research more
+//function provided by Springboard
 function shuffle(array) {
   let counter = array.length;
-
-  // While there are elements in the array
   while (counter > 0) {
-    // Pick a random index
     let index = Math.floor(Math.random() * counter);
-
-    // Decrease counter by 1
     counter--;
-
-    // And swap the last element with it
     let temp = array[counter];
     array[counter] = array[index];
     array[index] = temp;
   }
-
   return array;
 }
 
-let shuffledColors = shuffle(COLORS);
-
-// this function loops over the array of colors
-// it creates a new div and gives it a class with the value of the color
-// it also adds an event listener for a click for each card
-function createDivsForColors(colorArray) {
-  for (let color of colorArray) {
-    // create a new div
+//function provided by Springboard, modified to use data-attributes instead of class
+//and utilize emojis as well as colors
+function createDivsForColors(combinedArray) {
+  for (element of combinedArray) {
     const newDiv = document.createElement("div");
-
-    // give it a class attribute for the value we are looping over
-    newDiv.classList.add(color);
-
-    // call a function handleCardClick when a div is clicked on
+    newDiv.setAttribute("data-color", element.color);
+    newDiv.setAttribute("data-emoji", element.emoji);
     newDiv.addEventListener("click", handleCardClick);
-
-    // append the div to the element with an id of game
     gameContainer.append(newDiv);
   }
 }
 
 // TODO: Implement this function!
 function handleCardClick(event) {
+  let card = event.target;
   if (
     cardsToClear.length == 0 &&
+    !card.getAttribute("data-matched") &&
     (cardsToEvaluate.length == 0 ||
-      (cardsToEvaluate.length < 2 && cardsToEvaluate[0] !== event.target))
+      (cardsToEvaluate.length < 2 && cardsToEvaluate[0] !== card))
   ) {
-    setColor(event.target, event.target.className);
-    cardsToEvaluate.push(event.target);
+    setColorAndEmoji(
+      card,
+      card.getAttribute("data-color"),
+      card.getAttribute("data-emoji")
+    );
+    cardsToEvaluate.push(card);
+    incrementScore();
   }
   if (cardsToEvaluate.length == 2) {
     evaluateCards();
@@ -75,24 +74,134 @@ function handleCardClick(event) {
 }
 
 function evaluateCards() {
-  if (cardsToEvaluate[0].className != cardsToEvaluate[1].className) {
+  if (
+    cardsToEvaluate[0].getAttribute("data-color") !=
+    cardsToEvaluate[1].getAttribute("data-color")
+  ) {
     cardsToClear.push(cardsToEvaluate.pop());
     cardsToClear.push(cardsToEvaluate.pop());
     setTimeout(clearMismatches, 1000);
   } else {
-    cardsToEvaluate.splice(0, 2);
+    cardsToEvaluate.pop().setAttribute("data-matched", true);
+    cardsToEvaluate.pop().setAttribute("data-matched", true);
+    matchedCardNumber += 2;
+    if (matchedCardNumber == cardNumber) {
+      recordScore();
+    }
   }
 }
 
 function clearMismatches() {
   while (cardsToClear.length > 0) {
-    setColor(cardsToClear.pop(), "");
+    setColorAndEmoji(cardsToClear.pop(), "", "");
   }
 }
 
-function setColor(card, color) {
-  card.style.backgroundColor = color;
+function recordScore() {
+  if (scores.best < 0 || scores.current < scores.best) {
+    scores.best = scores.current;
+    bestScore.textContent = `- ${cardNumber} Cards: ` + scores.current;
+    localStorage.setItem("bestScore" + cardNumber, scores.best);
+  }
 }
 
-// when the DOM loads
-createDivsForColors(shuffledColors);
+function adjustNumberOfColors(inputNum) {
+  let newColorArray;
+  if (inputNum > 10) {
+    newColorArray = [...COLORS];
+    while (newColorArray.length != inputNum) {
+      let newColor = randomColor();
+      if (!newColorArray.includes(newColor)) {
+        newColorArray.push(newColor, newColor);
+      }
+    }
+  } else {
+    newColorArray = [...COLORS];
+    while (newColorArray.length != inputNum) {
+      let removalIndex =
+        Math.floor(Math.random() * (newColorArray.length / 2)) * 2;
+      newColorArray.splice(removalIndex, 2);
+    }
+  }
+  return newColorArray;
+}
+
+function assignEmojisToColors(colorArray) {
+  let combinedArray = [];
+  for (let i = 0; i < colorArray.length; i += 2) {
+    let emoji = randomEmoji();
+    while (includedEmoji.includes(emoji)) {
+      emoji = randomEmoji();
+    }
+    includedEmoji.push(emoji);
+    let colorEmojiObj = { color: colorArray[i], emoji };
+    combinedArray.push(colorEmojiObj, colorEmojiObj);
+  }
+  return combinedArray;
+}
+
+function randomColor() {
+  let red = Math.floor(Math.random() * 256);
+  let green = Math.floor(Math.random() * 256);
+  let blue = Math.floor(Math.random() * 256);
+  return `rgb(${red}, ${green}, ${blue})`;
+}
+
+function randomEmoji() {
+  let emojiNum = Math.floor(Math.random() * 768) + 127744;
+  return `&#${emojiNum};`;
+}
+
+function getShuffledComboArray() {
+  let outputArray = assignEmojisToColors(adjustNumberOfColors(cardNumber));
+  shuffle(outputArray);
+  return outputArray;
+}
+
+function setColorAndEmoji(card, color, emoji) {
+  card.style.backgroundColor = color;
+  card.innerHTML = emoji;
+}
+
+function incrementScore() {
+  currentScore.textContent = ++scores.current;
+}
+
+function resetGame(numCards) {
+  gameContainer.textContent = "";
+  matchedCardNumber = 0;
+  includedEmoji = [];
+  scores.current = -1;
+  let storedBest = localStorage.getItem("bestScore" + numCards);
+  if (storedBest != null) {
+    scores.best = Number(storedBest);
+    bestScore.textContent = `- ${numCards} Cards: ` + storedBest;
+  } else {
+    scores.best = -1;
+    bestScore.textContent = `- ${numCards} Cards: None Yet!`;
+  }
+  incrementScore();
+  let shuffledColorsAndEmojis = getShuffledComboArray();
+  createDivsForColors(shuffledColorsAndEmojis);
+}
+
+// Provided by Springboard, removed to start game with start button instead
+//createDivsForColors(shuffledColors);
+
+startButton.addEventListener("click", function (e) {
+  resetGame(10);
+  startButton.disabled = true;
+  resetButton.disabled = false;
+});
+
+resetButton.addEventListener("click", function (e) {
+  resetGame(cardNumber);
+});
+
+submitButton.addEventListener("click", function (e) {
+  e.preventDefault();
+  if (enteredNumber.validity.valid) {
+    cardNumber = enteredNumber.value;
+    resetGame(cardNumber);
+  }
+});
