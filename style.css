@@ -1,11 +1,25 @@
 #game div {
   border: 1px solid black;
-  width: 15%;
-  height: 200px;
+  width: 5rem;
+  height: 5rem; 
   margin: 10px;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
-  line-height: 200px;
-  font-size: 5rem;
+  line-height: 5rem;
+  font-size: 2.5rem;
+  transition: transform 0.3s;
+  transform-style: preserve-3d;
+}
+
+#number-entry{
+  width: 3rem;
+}
+
+.flip{
+  transform: rotateY(180deg);
+}
+
+body{
+  text-align: center;
 }

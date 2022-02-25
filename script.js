@@ -60,11 +60,14 @@ function handleCardClick(event) {
     (cardsToEvaluate.length == 0 ||
       (cardsToEvaluate.length < 2 && cardsToEvaluate[0] !== card))
   ) {
-    setColorAndEmoji(
-      card,
-      card.getAttribute("data-color"),
-      card.getAttribute("data-emoji")
-    );
+    card.classList.toggle("flip");
+    setTimeout(function () {
+      setColorAndEmoji(
+        card,
+        card.getAttribute("data-color"),
+        card.getAttribute("data-emoji")
+      );
+    }, 100);
     cardsToEvaluate.push(card);
     incrementScore();
   }
@@ -93,7 +96,9 @@ function evaluateCards() {
 
 function clearMismatches() {
   while (cardsToClear.length > 0) {
-    setColorAndEmoji(cardsToClear.pop(), "", "");
+    let card = cardsToClear.pop();
+    setColorAndEmoji(card, "", "");
+    card.classList.toggle("flip");
   }
 }
 
@@ -203,5 +208,9 @@ submitButton.addEventListener("click", function (e) {
   if (enteredNumber.validity.valid) {
     cardNumber = enteredNumber.value;
     resetGame(cardNumber);
+    if (!startButton.disabled) {
+      startButton.disabled = true;
+      resetButton.disabled = false;
+    }
   }
 });
