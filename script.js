@@ -2,6 +2,8 @@ const gameContainer = document.getElementById("game");
 const startButton = document.querySelector("#start-button");
 const resetButton = document.querySelector("#reset-button");
 const submitButton = document.querySelector("#submit-button");
+const resetScoresButton = document.querySelector("#reset-scores-button");
+const scoreContainer = document.querySelector("#score-container");
 const currentScore = document.querySelector("#score-current");
 const bestScore = document.querySelector("#score-best");
 const enteredNumber = document.querySelector("#number-entry");
@@ -46,6 +48,7 @@ function createDivsForColors(combinedArray) {
     const newDiv = document.createElement("div");
     newDiv.setAttribute("data-color", element.color);
     newDiv.setAttribute("data-emoji", element.emoji);
+    newDiv.classList.add("flip");
     newDiv.addEventListener("click", handleCardClick);
     gameContainer.append(newDiv);
   }
@@ -67,6 +70,7 @@ function handleCardClick(event) {
         card.getAttribute("data-color"),
         card.getAttribute("data-emoji")
       );
+      // twemoji.parse(card);
     }, 100);
     cardsToEvaluate.push(card);
     incrementScore();
@@ -105,7 +109,7 @@ function clearMismatches() {
 function recordScore() {
   if (scores.best < 0 || scores.current < scores.best) {
     scores.best = scores.current;
-    bestScore.textContent = `- ${cardNumber} Cards: ` + scores.current;
+    bestScore.textContent = `${cardNumber} Cards: ${scores.current} moves`;
     localStorage.setItem("bestScore" + cardNumber, scores.best);
   }
 }
@@ -176,14 +180,17 @@ function resetGame(numCards) {
   gameContainer.textContent = "";
   matchedCardNumber = 0;
   includedEmoji = [];
+  if (scoreContainer.style.visibility = "hidden") {
+    scoreContainer.style.visibility = "visible";
+  }
   scores.current = -1;
   let storedBest = localStorage.getItem("bestScore" + numCards);
   if (storedBest != null) {
     scores.best = Number(storedBest);
-    bestScore.textContent = `- ${numCards} Cards: ` + storedBest;
+    bestScore.textContent = `${numCards} Cards: ${storedBest} moves`;
   } else {
     scores.best = -1;
-    bestScore.textContent = `- ${numCards} Cards: None Yet!`;
+    bestScore.textContent = `${numCards} Cards: None Yet!`;
   }
   incrementScore();
   let shuffledColorsAndEmojis = getShuffledComboArray();
@@ -213,4 +220,10 @@ submitButton.addEventListener("click", function (e) {
       resetButton.disabled = false;
     }
   }
+});
+
+resetScoresButton.addEventListener("click", function (e) {
+  localStorage.clear();
+  scores.best = -1;
+  bestScore.textContent = `${cardNumber} Cards: None Yet!`;
 });

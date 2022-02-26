@@ -2,15 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Memory Game!</title>
+    <title>Memory Game</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Memory Game!</h1>
+    <h1>Memory Game</h1>
     <div id="game"></div>
     <div id="score-container">
-      <div>Current score: <span id="score-current">0</span></div>
-      <div>Best score <span id="score-best"></span></div>
+      <div>Current Moves: <span id="score-current">0</span></div>
+      <div>Best score for <span id="score-best"></span></div>
     </div>
     <div id="button-container">
       <button id="start-button">Start Game</button>
@@ -18,7 +18,7 @@
     </div>
     <form>
       <div id = >
-        <label for="number-entry">Number of cards (multiple of 2, max 1534):</label>
+        <label for="number-entry">Number of cards (multiple of 2; max 1,500):</label>
         <input id="number-entry" type="number" placeholder="10" step="2" min="2" max="1534" required>
         <span id="valid-number"></span>
       </div>
@@ -26,6 +26,7 @@
         <input type="submit" value="Reset to new number" id="submit-button">
       </div>
     </form>
+    <button id="reset-scores-button">Reset Saved Scores</button>
     <script src="script.js"></script>
   </body>
 </html>
